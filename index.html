@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <title>IES no Distrito Federal - Instituições de Ensino Superior</title>
+</head>
+
+<body>
+    <header>
+        <h1>Instituições de Ensino Superior do DF</h1>
+        <p class="descricao">Consulte informações sobre instituições e cursos disponíveis no Distrito Federal</p>
+    </header>
+    
+    <main id="conteudo-principal">
+        <div id="controles">
+            <div id="filtro-busca">
+                <label for="busca">Buscar instituição:</label>
+                <input type="search" id="busca" placeholder="Digite o nome da instituição...">
+                <button id="btnBuscar" aria-label="Buscar instituições">Buscar</button>
+            </div>
+        </div>
+        
+        <div id="status-carregamento" aria-live="polite">
+            <p>Carregando dados...</p>
+        </div>
+        
+        <section id="dados" aria-label="Lista de instituições"></section>
+        
+        <nav id="paginacao" aria-label="Navegação entre páginas">
+            <button id="btnAnterior" aria-label="Página anterior">Anterior</button>
+            <span id="paginaAtual" aria-current="page">Página 1</span>
+            <button id="btnProximo" aria-label="Próxima página">Próximo</button>
+        </nav>
+    </main>
+
+    <footer>
+        <p>Dados obtidos do Ministério da Educação</p>
+    </footer>
+
+    <template id="template-instituicao">
+        <section class="instituicao" aria-label="Informações da instituição">
+            <header>
+                <h2 class="instituicao-nome"></h2>
+            </header>
+            <div class="instituicao-detalhes">
+                <p><strong>ID:</strong> <span class="instituicao-id"></span></p>
+                <p><strong>Tipo de Instituição:</strong> <span class="instituicao-tipo"></span></p>
+                <p><strong>Localização:</strong> <span class="instituicao-local"></span></p>
+            </div>
+            <section class="secao-cursos">
+                <h3>Cursos Oferecidos</h3>
+                <table class="tabela-cursos">
+                    <caption>Lista de cursos disponíveis na instituição</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">Curso</th>
+                            <th scope="col">Grau</th>
+                            <th scope="col">Modalidade</th>
+                            <th scope="col">Carga Horária</th>
+                        </tr>
+                    </thead>
+                    <tbody class="corpo-tabela">
+                        <!-- Cursos serão inseridos aqui -->
+                    </tbody>
+                </table>
+            </section>
+        </section>
+    </template>
+
+    <template id="template-curso">
+        <tr class="linha-curso">
+            <td class="curso-nome"></td>
+            <td class="curso-grau"></td>
+            <td class="curso-modalidade"></td>
+            <td class="curso-carga"></td>
+        </tr>
+    </template>
+
+    <template id="template-sem-resultados">
+        <div class="mensagem-info">
+            <p>Nenhuma instituição encontrada com os critérios informados.</p>
+            <button id="btnLimparFiltros" aria-label="Limpar filtros de busca">Limpar filtros</button>
+        </div>
+    </template>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="scripts.js"></script>
+</body>
+
+</html>
