@@ -12,22 +12,31 @@
         <h1>Instituições de Ensino Superior do DF</h1>
         <p class="descricao">Consulte informações sobre instituições e cursos disponíveis no Distrito Federal</p>
     </header>
-    
+
     <main id="conteudo-principal">
         <div id="controles">
             <div id="filtro-busca">
-                <label for="busca">Buscar instituição:</label>
-                <input type="search" id="busca" placeholder="Digite o nome da instituição...">
+                <div class="campo-busca">
+                    <label for="tipoBusca">Buscar por:</label>
+                    <select id="tipoBusca" aria-label="Tipo de busca">
+                        <option value="nome">Nome</option>
+                        <option value="id">ID</option>
+                    </select>
+                </div>
+                <div class="campo-busca entrada">
+                    <label for="busca">Termo de busca:</label>
+                    <input type="search" id="busca" placeholder="Digite o termo de busca...">
+                </div>
                 <button id="btnBuscar" aria-label="Buscar instituições">Buscar</button>
             </div>
         </div>
-        
+
         <div id="status-carregamento" aria-live="polite">
             <p>Carregando dados...</p>
         </div>
-        
+
         <section id="dados" aria-label="Lista de instituições"></section>
-        
+
         <nav id="paginacao" aria-label="Navegação entre páginas">
             <button id="btnAnterior" aria-label="Página anterior">Anterior</button>
             <span id="paginaAtual" aria-current="page">Página 1</span>
