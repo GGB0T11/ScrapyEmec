@@ -21,10 +21,18 @@ const elementos = {
     btnProximo: document.getElementById("btnProximo"),
     pagina: document.getElementById("paginaAtual"),
     templateInstituicao: document.getElementById("template-instituicao"),
-    templateCurso: document.getElementById("template-curso")
+    templateCurso: document.getElementById("template-curso"),
+    statusCarregamento: document.getElementById("status-carregamento")
 };
 
+// Função para mostrar/ocultar o indicador de carregamento
+function mostrarCarregamento(exibir = true) {
+    elementos.statusCarregamento.style.display = exibir ? "block" : "none";
+}
+
 async function carregarDados(direcao = 'proximo') {
+    mostrarCarregamento(true);
+    
     try {
         let query = db.collection("instituicoes")
                      .orderBy("nome")
@@ -51,10 +59,26 @@ async function carregarDados(direcao = 'proximo') {
         snapshot.forEach(doc => renderizarInstituicao(doc));
 
         elementos.pagina.textContent = `Página ${paginaAtual}`;
+        
+        // Verificar se existe página anterior e próxima
         elementos.btnAnterior.disabled = paginaAtual === 1;
+        
+        // Verificar se existe uma próxima página
+        if (direcao !== 'anterior') {
+            const proximaQuery = db.collection("instituicoes")
+                .orderBy("nome")
+                .startAfter(ultimoDoc)
+                .limit(1);
+                
+            const proximaSnapshot = await proximaQuery.get();
+            elementos.btnProximo.disabled = proximaSnapshot.empty;
+        }
 
     } catch (erro) {
         console.error("Erro:", erro);
+        elementos.dados.innerHTML = '<p>Erro ao carregar dados</p>';
+    } finally {
+        mostrarCarregamento(false);
     }
 }
 
@@ -69,17 +93,29 @@ function renderizarInstituicao(doc) {
 
     const corpoTabela = clone.querySelector(".corpo-tabela");
     
-    Object.entries(data.cursos || {}).forEach(([nome, detalhes]) => {
-        const cursoClone = elementos.templateCurso.content.cloneNode(true);
-        const info = detalhes[0] || {};
-        
-        cursoClone.querySelector(".curso-nome").textContent = nome;
-        cursoClone.querySelector(".curso-grau").textContent = info.grau || "N/I";
-        cursoClone.querySelector(".curso-modalidade").textContent = info.modalidade || "N/I";
-        cursoClone.querySelector(".curso-carga").textContent = info.carga || "N/I";
+    // Verificar se existem cursos
+    if (data.cursos && Object.keys(data.cursos).length > 0) {
+        Object.entries(data.cursos).forEach(([nome, detalhes]) => {
+            const cursoClone = elementos.templateCurso.content.cloneNode(true);
+            const info = detalhes[0] || {};
+            
+            cursoClone.querySelector(".curso-nome").textContent = nome;
+            cursoClone.querySelector(".curso-grau").textContent = info.grau || "N/I";
+            cursoClone.querySelector(".curso-modalidade").textContent = info.modalidade || "N/I";
+            cursoClone.querySelector(".curso-carga").textContent = info.carga || "N/I";
 
-        corpoTabela.appendChild(cursoClone);
-    });
+            corpoTabela.appendChild(cursoClone);
+        });
+    } else {
+        // Caso não tenha cursos
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '4');
+        td.textContent = 'Nenhum curso cadastrado';
+        td.style.textAlign = 'center';
+        tr.appendChild(td);
+        corpoTabela.appendChild(tr);
+    }
 
     elementos.dados.appendChild(clone);
 }
@@ -96,4 +132,7 @@ elementos.btnAnterior.addEventListener('click', () => {
     }
 });
 
-carregarDados();
+// Iniciar o carregamento de dados quando a página carregar
+document.addEventListener('DOMContentLoaded', () => {
+    carregarDados();
+});
