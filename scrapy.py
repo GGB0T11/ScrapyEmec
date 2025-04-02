@@ -174,7 +174,7 @@ def coleta_info(ies_id, curso):
 
                     detalhes = driver.find_element(By.ID, "div-detalhe-curso-cine")
                     area_raw = detalhes.find_element(By.XPATH, '//*[@id="div-detalhe-curso-cine"]/table/tbody/tr[2]/td/table/tbody/tr/td[1]').text
-                    area_curso = area_raw[1].strip()
+                    area_curso = area_raw.split("-")[1].strip()
 
                     itens = {
                         "modalidade": modalidade,
@@ -201,7 +201,7 @@ if __name__ == "__main__":
     cred = credentials.Certificate("credencial.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
-    colecao_ref = db.collection("newinstituicoes")
+    colecao_ref = db.collection("instituicoes")
     batch = db.batch()
 
     uf = "Distrito Federal"
