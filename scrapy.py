@@ -3,8 +3,8 @@ import re
 from time import sleep
 
 import firebase_admin
-from firebase_admin import credentials, firestore
 from bs4 import BeautifulSoup
+from firebase_admin import credentials, firestore
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
@@ -15,7 +15,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 servico = Service(ChromeDriverManager().install())
 options = webdriver.ChromeOptions()
 driver = webdriver.Chrome(service=servico, options=options)
-wait = WebDriverWait(driver, 60)
+wait = WebDriverWait(driver, 30)
 
 
 def coleta_ies(uf):
@@ -168,11 +168,20 @@ def coleta_info(ies_id, curso):
                         EC.invisibility_of_element_located((By.CLASS_NAME, "loading"))
                     )
                     detalhes = driver.find_element(By.ID, "div-detalhe-curso")
-                    itens = detalhes.find_elements(By.TAG_NAME, "td")
-                    carga_raw = itens[8].text.split(" ")
+                    celulas = detalhes.find_elements(By.TAG_NAME, "td")
+                    carga_raw = celulas[8].text.split(" ")
                     carga = f"{int(carga_raw[2]) / 2} anos"
 
-                    itens = {"modalidade": modalidade, "grau": grau, "carga": carga}
+                    detalhes = driver.find_element(By.ID, "div-detalhe-curso-cine")
+                    area_raw = detalhes.find_element(By.XPATH, '//*[@id="div-detalhe-curso-cine"]/table/tbody/tr[2]/td/table/tbody/tr/td[1]').text
+                    area_curso = area_raw[1].strip()
+
+                    itens = {
+                        "modalidade": modalidade,
+                        "grau": grau,
+                        "carga": carga,
+                        "area_curso": area_curso,
+                    }
                     if itens not in infos:
                         infos.append(itens)
 
@@ -192,7 +201,7 @@ if __name__ == "__main__":
     cred = credentials.Certificate("credencial.json")
     firebase_admin.initialize_app(cred)
     db = firestore.client()
-    colecao_ref = db.collection("instituicoes")
+    colecao_ref = db.collection("newinstituicoes")
     batch = db.batch()
 
     uf = "Distrito Federal"
