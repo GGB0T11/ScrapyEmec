@@ -95,8 +95,16 @@ async function buscarDocumentoEspecifico() {
             if (!snapshot.empty) {
                 doc = snapshot.docs[0];
             }
-        }
-        
+        } else if (filtroAtivo.tipo === 'sigla') {
+            const snapshot = await db.collection("instituicoes")
+                                     .where("sigla", "==", filtroAtivo.valor.toUpperCase())
+                                     .limit(1)
+                                      .get();
+    
+            if (!snapshot.empty) {
+                doc = snapshot.docs[0];
+            }
+        }        
         elementos.dados.innerHTML = '';
         
         if (doc && doc.exists) {
