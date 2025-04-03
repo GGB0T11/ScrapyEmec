@@ -134,68 +134,56 @@ def coleta_info(ies_id, curso):
     infos = []
     tentativa = 0
 
-    while tentativa < 6:
-        try:
-            driver.get(link)
-            wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
+    driver.get(link)
+    wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
 
-            # mudando o Iframe
-            iframe = driver.find_elements(By.NAME, "tabIframe2")
-            driver.switch_to.frame(iframe[1])
+    # mudando o Iframe
+    iframe = wait.until(EC.presencre_of_element_located((By.NAME, "tabIframe2")))
+    driver.switch_to.frame(iframe[1])
 
-            # coletando as informacoes
+    # coletando as informacoes
+    wait.until(
+        EC.presence_of_element_located(
+            (By.XPATH, '//*[@id="listar-ies-cadastro"]/tbody')
+        )
+    )
+    source = driver.page_source
+    site = BeautifulSoup(source, "html.parser")
+    tabela = site.find("div", id="div-listar-curso-desagrupado")
+    linhas = tabela.find_all("tr", class_=["corDetalhe2", "corDetalhe1"])
+
+    for linha in linhas:
+        celulas = [cell.text.strip() for cell in linha.find_all("td")]
+        status = str(linha.find("img"))
+        if "bolaVerde" in status and len(celulas[4]) != 0:
+            elemento_id = celulas[0]
+            modalidade = celulas[1]
+            grau = celulas[2]
+            clique = driver.find_element(By.ID, f"tr_{elemento_id}")
+            driver.execute_script("arguments[0].click();", clique)
+
             wait.until(
-                EC.presence_of_element_located(
-                    (By.XPATH, '//*[@id="listar-ies-cadastro"]/tbody')
-                )
+                EC.invisibility_of_element_located((By.CLASS_NAME, "loading"))
             )
-            source = driver.page_source
-            site = BeautifulSoup(source, "html.parser")
-            tabela = site.find("div", id="div-listar-curso-desagrupado")
-            linhas = tabela.find_all("tr", class_=["corDetalhe2", "corDetalhe1"])
+            detalhes = driver.find_element(By.ID, "div-detalhe-curso")
+            celulas = detalhes.find_elements(By.TAG_NAME, "td")
+            carga_raw = celulas[8].text.split(" ")
+            carga = f"{int(carga_raw[2]) / 2} anos"
 
-            for linha in linhas:
-                celulas = [cell.text.strip() for cell in linha.find_all("td")]
-                status = str(linha.find("img"))
-                if "bolaVerde" in status and len(celulas[4]) != 0:
-                    elemento_id = celulas[0]
-                    modalidade = celulas[1]
-                    grau = celulas[2]
-                    clique = driver.find_element(By.ID, f"tr_{elemento_id}")
-                    driver.execute_script("arguments[0].click();", clique)
+            detalhes = driver.find_element(By.ID, "div-detalhe-curso-cine")
+            area_raw = detalhes.find_element(By.XPATH, '//*[@id="div-detalhe-curso-cine"]/table/tbody/tr[2]/td/table/tbody/tr/td[1]').text
+            area_curso = area_raw.split("-")[1].strip()
 
-                    wait.until(
-                        EC.invisibility_of_element_located((By.CLASS_NAME, "loading"))
-                    )
-                    detalhes = driver.find_element(By.ID, "div-detalhe-curso")
-                    celulas = detalhes.find_elements(By.TAG_NAME, "td")
-                    carga_raw = celulas[8].text.split(" ")
-                    carga = f"{int(carga_raw[2]) / 2} anos"
+            itens = {
+                "modalidade": modalidade,
+                "grau": grau,
+                "carga": carga,
+                "area_curso": area_curso,
+            }
+            if itens not in infos:
+                infos.append(itens)
 
-                    detalhes = driver.find_element(By.ID, "div-detalhe-curso-cine")
-                    area_raw = detalhes.find_element(By.XPATH, '//*[@id="div-detalhe-curso-cine"]/table/tbody/tr[2]/td/table/tbody/tr/td[1]').text
-                    area_curso = area_raw.split("-")[1].strip()
-
-                    itens = {
-                        "modalidade": modalidade,
-                        "grau": grau,
-                        "carga": carga,
-                        "area_curso": area_curso,
-                    }
-                    if itens not in infos:
-                        infos.append(itens)
-
-            return infos
-
-        except Exception as e:
-            tentativa += 1
-            print(e)
-            print(link)
-            sleep(2)
-            driver.refresh()
-
-    print("Deu merda nessa porra")
-
+    return infos
 
 if __name__ == "__main__":
     cred = credentials.Certificate("credencial.json")
