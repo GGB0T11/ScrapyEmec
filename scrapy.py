@@ -138,7 +138,7 @@ def coleta_info(ies_id, curso):
     wait.until(EC.invisibility_of_element_located((By.CLASS_NAME, "loading")))
 
     # mudando o Iframe
-    iframe = wait.until(EC.presencre_of_element_located((By.NAME, "tabIframe2")))
+    iframe = wait.until(EC.presence_of_all_elements_located((By.NAME, "tabIframe2")))
     driver.switch_to.frame(iframe[1])
 
     # coletando as informacoes
@@ -186,11 +186,11 @@ def coleta_info(ies_id, curso):
     return infos
 
 if __name__ == "__main__":
-    cred = credentials.Certificate("credencial.json")
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
-    colecao_ref = db.collection("instituicoes")
-    batch = db.batch()
+    # cred = credentials.Certificate("credencial.json")
+    # firebase_admin.initialize_app(cred)
+    # db = firestore.client()
+    # colecao_ref = db.collection("instituicoes")
+    # batch = db.batch()
 
     uf = "Distrito Federal"
     iess = coleta_ies(uf)
@@ -210,8 +210,8 @@ if __name__ == "__main__":
                     iess[ies_id]["cursos"][curso_id] = infos
                     print(f"Coletadas {len(infos)} informações para {curso_id}")
 
-            doc_ref = colecao_ref.document(ies_id)
-            batch.set(doc_ref, iess[ies_id])
+            # doc_ref = colecao_ref.document(ies_id)
+            # batch.set(doc_ref, iess[ies_id])
 
             print(f"Documento {ies_id} pronto para envio")
 
@@ -219,7 +219,7 @@ if __name__ == "__main__":
             print(f"Erro de processamento no Documento {ies_id}: {str(e)}")
 
     try:
-        batch.commit()
+        # batch.commit()
         print("Documentos enviados com sucesso")
 
     except Exception as e:
